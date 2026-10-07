@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Главный Штаб — Панель Управления</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #0d0d0d;
+            color: #dcd6cd;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Текстовый заголовок в стиле военной тактической панели */
+        h1 {
+            color: #e6c280;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+            font-size: 24px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .subtitle {
+            color: #7a7265;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 45px;
+            font-weight: bold;
+        }
+
+        /* Контейнер для двух больших секторов управления */
+        .menu-container {
+            display: flex;
+            gap: 25px;
+            max-width: 750px;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        /* Строгий стиль плитки без смайликов */
+        .menu-card {
+            flex: 1;
+            background: linear-gradient(180deg, #1c1b18 0%, #12110f 100%);
+            border: 1px solid #3a352a;
+            border-radius: 4px;
+            padding: 45px 30px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.25s ease-in-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Аккуратное строгое свечение при наведении */
+        .menu-card:hover {
+            border-color: #e6c280;
+            background: linear-gradient(180deg, #24221e 0%, #171513 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(230, 194, 128, 0.1);
+        }
+
+        /* Технический маркер вместо эмодзи */
+        .menu-card .section-tag {
+            font-size: 10px;
+            color: #e6c280;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background-color: #2b261f;
+            padding: 4px 10px;
+            border-radius: 2px;
+            border: 1px solid #544939;
+            margin-bottom: 5px;
+        }
+
+        .menu-card h3 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+        }
+
+        .menu-card p {
+            margin: 10px 0 0 0;
+            font-size: 13px;
+            color: #8c8579;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ГЛАВНЫЙ ШТАБ УПРАВЛЕНИЯ</h1>
+    <div class="subtitle">Тактический сектор авторизации лорда-хранителя</div>
+
+    <div class="menu-container">
+
+        <!-- Сектор Артефактов -->
+        <a href="{% url 'artifacts' %}" class="menu-card">
+            <div class="section-tag">Сектор А-1</div>
+            <h3>Архив Артефактов</h3>
+            <p>Учет и контроль древних реликвий королевства. Распределение мощностей по оборонительным локациям и управление ковкой.</p>
+        </a>
+
+        <!-- Сектор Рыцарей -->
+        <a href="{% url 'knights_list' %}" class="menu-card">
+            <div class="section-tag">Сектор Б-2</div>
+            <h3>Рыцарский Орден</h3>
+            <p>Контроль верности личного состава, учет расовых принадлежностей, распределение воинов по боевым фракциям и чистка рядов.</p>
+        </a>
+
+    </div>
+
+</body>
+</html>

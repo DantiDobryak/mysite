@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список демонов</title>
+    <style>
+    body { font-family: Arial, sans-serif; background-color: #1a1a1a; color: #fff; padding: 20px; }
+    .servant-card { background-color: #2a2a2a; border-left: 5px solid #ff4d4d; padding: 15px; margin-bottom: 15px; border-radius: 6px; }
+    strong { color: #ffeb3b; }
+
+    /* --- ДОБАВЛЯЕМ ПРОПУЩЕННЫЕ СТИЛИ ДЛЯ ИНТЕРФЕЙСА ФИЛЬТРОВ --- */
+    .gamedb-form-panel {
+        background-color: #222;
+        border: 1px solid #3b5998;
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: flex-end; /* Выравнивает кнопку и инпуты по нижней линии */
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .form-group label {
+        font-size: 12px;
+        color: #aaa;
+    }
+    .gamedb-input, .gamedb-select {
+        background-color: #333;
+        border: 1px solid #555;
+        border-radius: 4px;
+        color: #fff;
+        padding: 8px 12px;
+        font-size: 14px;
+        outline: none;
+    }
+    .gamedb-btn {
+        padding: 8px 16px;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 14px;
+    }
+        body { font-family: Arial, sans-serif; background-color: #1a1a1a; color: #fff; padding: 20px; }
+        .servant-card { background-color: #2a2a2a; border-left: 5px solid #ff4d4d; padding: 15px; margin-bottom: 15px; border-radius: 6px; }
+        strong { color: #ffeb3b; }
+    </style>
+</head>
+<body>
+    <h2>📝 Нанять нового слугу:</h2>
+    <form method="POST" action="{% url 'knights_list' %}">
+        {% csrf_token %} <!-- Магическая защита Django, без нее POST-запрос выдаст ошибку 403 -->
+        <input type="text" name="name" placeholder="Имя рыцаря" required>
+        <input type="text" name="race" placeholder="Раса (например, demon)" required>
+        <input type="number" name="loyalty" placeholder="Лояльность" required>
+
+        <label for="faction-select">Выберите фракцию:</label>
+        <select name="faction_id" id="faction-select">
+            <option value="">Без фракции</option>
+            <!-- Циклом перебираем все фракции, которые передадим из views.py -->
+            {% for faction in factions %}
+                <option value="{{ faction.id }}">{{ faction.name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Отправить на службу</button>
+    </form>
+<hr>
+
+<!-- ПАНЕЛЬ ДИНАМИЧЕСКОЙ ФИЛЬТРАЦИИ -->
+<div class="gamedb-form-panel" style="margin-top: 20px; border-color: #3b5998;">
+    <h2>🔍 Фильтрация Рыцарского Ордена</h2>
+    <!-- Метод GET, action пустой (отправляет на эту же страницу) -->
+    <form method="GET" action="" class="form-row">
+
+        <div class="form-group">
+            <label>Фильтр по расе</label>
+            <input type="text" name="filter_race" class="gamedb-input" placeholder="Например, demon..." value="{{ current_race|default:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Минимальная лояльность</label>
+            <input type="number" name="filter_loyalty" class="gamedb-input" placeholder="От 0 до 100" value="{{ current_loyalty|default:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Статус активности</label>
+            <select name="filter_active" class="gamedb-select">
+                <option value="">Все воины</option>
+                <option value="true" {% if current_active == 'true' %}selected{% endif %}>Только активные</option>
+                <option value="false" {% if current_active == 'false' %}selected{% endif %}>В отставке</option>
+            </select>
+        </div>
+
+        <button type="submit" class="gamedb-btn" style="background: linear-gradient(180deg, #2196f3 0%, #0d47a1 100%); border-color: #002171; box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);">
+            ⚔️ Применить
+        </button>
+        <!-- Кнопка сброса, которая просто перезагружает страницу без параметров -->
+        <a href="." class="gamedb-btn" style="background: #333; border-color: #444; text-decoration: none; text-align: center; line-height: 20px;">🔄 Сбросить</a>
+    </form>
+</div>
+
+    <h2>📜 Список рыцарей:</h2>
+
+    <!-- Вот этот цикл убирает скобки QuerySet и красиво выводит каждого слугу -->
+    {% for knight in knights %}
+        <div class="servant-card">
+            <p><strong>Имя:</strong> {{ knight.name.capitalize }}</p>
+            <p><strong>Раса:</strong> {{ knight.race.capitalize }}</p>
+            <p><strong>Уровень лояльности:</strong> {{ knight.loyalty_level }}%</p>
+            <!-- Добавляем вот эту строчку для вывода фракции -->
+            <p><strong>Фракция:</strong> {{ knight.faction.name|default:"Нет фракции" }}</p>
+
+            <form method="POST" action="{% url 'knights_list' %}" style="margin-top: 10px;">
+                {% csrf_token %}
+                <!-- Скрытое поле, которое передает ID конкретного слуги -->
+                <input type="hidden" name="knight_id" value="{{ knight.id }}">
+                <!-- Специальный маркер, чтобы views.py понял, что мы хотим именно УДАЛИТЬ, а не создать -->
+                <input type="hidden" name="action" value="delete">
+
+                <button type="submit" style="padding: 5px 12px; background-color: #ff4d4d; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                    ❌ Изгнать из дворца
+                </button>
+            </form>
+        </div>
+    {% empty %}
+        <p>Нет слуг, подходящих под условия.</p>
+    {% endfor %}
+
+</body>
+</html>

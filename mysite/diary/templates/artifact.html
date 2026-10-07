@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Архивы Королевства — Магические Артефакты</title>
+    <style>
+        /* Базовые стили темной игровой темы */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            padding: 30px;
+            margin: 0;
+        }
+
+        h1 {
+            color: #ffeb3b;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 235, 95, 0.2);
+        }
+
+        /* 1. СТИЛИЗАЦИЯ ПАНЕЛИ ФОРМЫ (Панель Ковки) */
+        .artifact-form-panel {
+            background: linear-gradient(135deg, #1e1e1e 0%, #141414 100%);
+            border: 1px solid #4a3f2f;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        }
+
+        .artifact-form-panel h2 {
+            margin-top: 0;
+            color: #ffb300;
+            font-size: 18px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #4a3f2f;
+            padding-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* Горизонтальный ряд для элементов формы */
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end; /* Выравнивает кнопку и инпуты по нижнему краю */
+        }
+
+        /* Блок поля: Текст строго НАВЕРХУ, инпут ВНИЗУ */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            color: #aaa49a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        /* Красивые поля ввода */
+        .rpg-input, .rpg-select {
+            background-color: #1a1a1a;
+            border: 1px solid #5a4a35;
+            border-radius: 4px;
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .rpg-input:focus, .rpg-select:focus {
+            border-color: #ffeb3b;
+            box-shadow: 0 0 8px rgba(255, 235, 59, 0.2);
+        }
+
+        /* Эпическая кнопка ковки */
+        .rpg-btn-create {
+            background: linear-gradient(180deg, #ff9800 0%, #e65100 100%);
+            color: white;
+            border: 1px solid #b33600;
+            border-radius: 4px;
+            padding: 11px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(230, 81, 0, 0.3);
+        }
+
+        .rpg-btn-create:hover {
+            background: linear-gradient(180deg, #ffa726 0%, #f57c00 100%);
+            box-shadow: 0 4px 16px rgba(230, 81, 0, 0.5);
+        }
+
+        /* 2. СТИЛИЗАЦИЯ КАРТОЧЕК АРТЕФАКТОВ */
+        .artifacts-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .artifact-card {
+            background-color: #1c1c1c;
+            border: 1px solid #2d2d2d;
+            border-left: 5px solid #ff9800; /* Золотая полоса слева */
+            padding: 18px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between; /* Название слева, кнопка удаления справа */
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .artifact-info h3 {
+            margin: 0 0 8px 0;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .artifact-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #b0b0b0;
+        }
+
+        .stat-badge {
+            background-color: #262626;
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 1px solid #3a3a3a;
+        }
+
+        .location-badge {
+            color: #00e676; /* Зеленое свечение для локации */
+            font-weight: bold;
+        }
+
+        /* Кнопка уничтожения */
+        .rpg-btn-delete {
+            background-color: #b71c1c;
+            color: white;
+            border: 1px solid #7f0000;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .rpg-btn-delete:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🏛️ Древние Архивы Королевства</h1>
+
+    <!-- ПАНЕЛЬ СОЗДАНИЯ АРТЕФАКТА -->
+    <div class="artifact-form-panel">
+        <h2>Выковать новый артефакт</h2>
+        <!-- Запрос отправляется на эту же страницу -->
+        <form method="POST" action="" class="form-row">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Название артефакта</label>
+                <input type="text" name="title" class="rpg-input" placeholder="Введите название..." required>
+            </div>
+
+            <div class="form-group">
+                <label>Мощность (0 - 100)</label>
+                <input type="number" name="power" class="rpg-input" placeholder="Уровень силы..." required>
+            </div>
+
+            <div class="form-group">
+                <label>Место хранения</label>
+                <select name="location_id" class="rpg-select">
+                    <option value="">Без локации (В пути)</option>
+                    <!-- Перебираем локации из контекста Бэкенда -->
+                    {% for location in locations %}
+                        <option value="{{ location.id }}">{{ location.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="rpg-btn-create">⚡ Выковать</button>
+        </form>
+    </div>
+
+    <!-- СПИСОК АРТЕФАКТОВ -->
+    <h2>📜 Зарегистрированные реликвии:</h2>
+    <div class="artifacts-grid">
+
+        <!-- Запускаем цикл по артефактам из Бэкенда -->
+        {% for artifact in artifacts %}
+            <div class="artifact-card">
+                <div class="artifact-info">
+                    <h3>🔮 {{ artifact.title }}</h3>
+                    <div class="artifact-stats">
+                        <span class="stat-badge">Мощность: <strong>{{ artifact.power_level }}%</strong></span>
+                        <!-- Вот тут показывается локация, в которой он находится -->
+                        <span class="stat-badge">Локация: <span class="location-badge">{{ artifact.location.name|default:"Не определена" }}</span></span>
+                    </div>
+                </div>
+
+                <!-- ФОРМА УДАЛЕНИЯ АРТЕФАКТА -->
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="artifact_id" value="{{ artifact.id }}">
+                    <input type="hidden" name="action" value="delete">
+                    <button type="submit" class="rpg-btn-delete">❌ Уничтожить</button>
+                </form>
+            </div>
+        {% empty %}
+            <p style="color: #aaa;">В архивах пока нет ни одного активного артефакта...</p>
+        {% endfor %}
+
+    </div>
+
+</body>
+</html>
