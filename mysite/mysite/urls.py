@@ -4,7 +4,9 @@ from diary import views
 
 urlpatterns = [
     path('', views.main_menu, name='main_menu'),
-    path('knights/', views.get_knights, name='knights_list'),
+    path('knights/', views.KnightListView.as_view(), name='knights_list'),
+    path('knights/create/', views.CreateKnightView.as_view(), name='create_knight'),
+    path('knights/<int:pk>/delete/', views.DeleteKnightView.as_view(), name='delete_knight'),
     path('login/', views.user_login, name='login'),
     path('artifacts/', views.get_artifacts, name='artifacts'),
     path('admin/', admin.site.urls),

@@ -55,24 +55,41 @@
     </style>
 </head>
 <body>
-    <h2>📝 Нанять нового слугу:</h2>
-    <form method="POST" action="{% url 'knights_list' %}">
-        {% csrf_token %} <!-- Магическая защита Django, без нее POST-запрос выдаст ошибку 403 -->
-        <input type="text" name="name" placeholder="Имя рыцаря" required>
-        <input type="text" name="race" placeholder="Раса (например, demon)" required>
-        <input type="number" name="loyalty" placeholder="Лояльность" required>
+    <h2>📝 Нанять нового рыцаря:</h2>
+<form method="POST" action="{% url 'create_knight' %}" class="form-row">
+    {% csrf_token %}
 
-        <label for="faction-select">Выберите фракцию:</label>
-        <select name="faction_id" id="faction-select">
+    <div class="form-group">
+        <label>Имя воина</label>
+        <input type="text" name="name" class="gamedb-input" placeholder="Имя рыцаря" required>
+    </div>
+
+    <div class="form-group">
+        <label>Раса</label>
+        <input type="text" name="race" class="gamedb-input" placeholder="Раса (например, demon)" required>
+    </div>
+
+    <div class="form-group">
+        <label>Лояльность воина</label>
+        <!-- ВАЖНО: Имя name должно быть строго "loyalty_level", как в твоей модели! -->
+        <input type="number" name="loyalty_level" class="gamedb-input" placeholder="Лояльность" required>
+    </div>
+
+    <div class="form-group">
+        <label for="faction-select">Выберите фракцию</label>
+        <select name="faction" id="faction-select" class="gamedb-select">
             <option value="">Без фракции</option>
-            <!-- Циклом перебираем все фракции, которые передадим из views.py -->
             {% for faction in factions %}
                 <option value="{{ faction.id }}">{{ faction.name }}</option>
             {% endfor %}
         </select>
+    </div>
 
-        <button type="submit">Отправить на службу</button>
-    </form>
+    <button type="submit" class="gamedb-btn" style="background: linear-gradient(180deg, #ff9800 0%, #e65100 100%); border: 1px solid #b33600;">
+        Отправить на службу
+    </button>
+</form>
+
 <hr>
 
 <!-- ПАНЕЛЬ ДИНАМИЧЕСКОЙ ФИЛЬТРАЦИИ -->
@@ -119,15 +136,13 @@
             <!-- Добавляем вот эту строчку для вывода фракции -->
             <p><strong>Фракция:</strong> {{ knight.faction.name|default:"Нет фракции" }}</p>
 
-            <form method="POST" action="{% url 'knights_list' %}" style="margin-top: 10px;">
+            <form method="POST" action="{% url 'delete_knight' pk=knight.id %}" style="margin-top: 10px;">
                 {% csrf_token %}
-                <!-- Скрытое поле, которое передает ID конкретного слуги -->
-                <input type="hidden" name="knight_id" value="{{ knight.id }}">
                 <!-- Специальный маркер, чтобы views.py понял, что мы хотим именно УДАЛИТЬ, а не создать -->
                 <input type="hidden" name="action" value="delete">
 
                 <button type="submit" style="padding: 5px 12px; background-color: #ff4d4d; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                    ❌ Изгнать из дворца
+                    ❌ Изгнать
                 </button>
             </form>
         </div>

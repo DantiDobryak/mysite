@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth import authenticate, login
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, DeleteView
 from rest_framework.permissions import AllowAny
 
 from .models import Knight, Faction, Location, Artifact
@@ -32,68 +34,69 @@ def main_menu(request):
 
 
 # работа с фракциями слуг
-@login_required
-def get_knights(request):
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action == 'delete':
-            knight_id = int(request.POST.get('knight_id'))
-            Knight.objects.filter(id=knight_id).delete()
+# @login_required
+# def get_knights(request):
+#     if request.method == 'POST':
+#         action = request.POST.get('action')
+#         if action == 'delete':
+#             knight_id = int(request.POST.get('knight_id'))
+#             Knight.objects.filter(id=knight_id).delete()
+#
+#             return redirect('knights_list')
+#
+#         name = request.POST.get('name')
+#         race = request.POST.get('race')
+#         loyalty = request.POST.get('loyalty')
+#         faction_id = request.POST.get('faction_id')
+#
+#         loyalty_int = int(loyalty) if loyalty else 0
+#         if loyalty_int < 0 or loyalty_int > 100:
+#             return HttpResponse('ОШИБКА: лояльность должна быть от 0 до 100!')
+#         elif not name or not race:
+#             return HttpResponse('ОШИБКА: поля не могут быть пустыми')
+#
+#         selected_faction = None
+#         if faction_id:
+#             selected_faction = Faction.objects.get(id=faction_id)
+#
+#         Knight.objects.create(name=name, race=race, loyalty_level=loyalty_int, faction=selected_faction)
+#
+#         return redirect('knights_list')
+#
+#     knights_queryset = Knight.objects.select_related('faction').all()
+#
+#     f_race = request.GET.get('filter_race')
+#     f_loyalty = request.GET.get('filter_loyalty')
+#     f_active = request.GET.get('filter_active')
+#
+#     if f_race:
+#         knights_queryset = knights_queryset.filter(race__icontains=f_race)
+#
+#     if f_loyalty:
+#         knights_queryset = knights_queryset.filter(loyalty_level=int(f_loyalty))
+#
+#     if f_active:
+#         is_active_bool = f_active == 'true'
+#         knights_queryset = knights_queryset.filter(is_active=is_active_bool)
+#
+#     knights_queryset = knights_queryset.order_by('-loyalty_level')
+#
+#     all_factions = Faction.objects.all()
+#
+#     return render(
+#         request,
+#         'knights_list.html',
+#         {
+#             'knights': knights_queryset,
+#             'factions': all_factions,
+#             'current_race': f_race,
+#             'current_loyalty': f_loyalty,
+#             'current_active': f_active
+#         }
+#     )
 
-            return redirect('knights_list')
-
-        name = request.POST.get('name')
-        race = request.POST.get('race')
-        loyalty = request.POST.get('loyalty')
-        faction_id = request.POST.get('faction_id')
-
-        loyalty_int = int(loyalty) if loyalty else 0
-        if loyalty_int < 0 or loyalty_int > 100:
-            return HttpResponse('ОШИБКА: лояльность должна быть от 0 до 100!')
-        elif not name or not race:
-            return HttpResponse('ОШИБКА: поля не могут быть пустыми')
-
-        selected_faction = None
-        if faction_id:
-            selected_faction = Faction.objects.get(id=faction_id)
-
-        Knight.objects.create(name=name, race=race, loyalty_level=loyalty_int, faction=selected_faction)
-
-        return redirect('knights_list')
-
-    knights_queryset = Knight.objects.select_related('faction').all()
-
-    f_race = request.GET.get('filter_race')
-    f_loyalty = request.GET.get('filter_loyalty')
-    f_active = request.GET.get('filter_active')
-
-    if f_race:
-        knights_queryset = knights_queryset.filter(race__icontains=f_race)
-
-    if f_loyalty:
-        knights_queryset = knights_queryset.filter(loyalty_level=int(f_loyalty))
-
-    if f_active:
-        is_active_bool = f_active == 'true'
-        knights_queryset = knights_queryset.filter(is_active=is_active_bool)
-
-    knights_queryset = knights_queryset.order_by('-loyalty_level')
-
-    all_factions = Faction.objects.all()
-
-    return render(
-        request,
-        'knights_list.html',
-        {
-            'knights': knights_queryset,
-            'factions': all_factions,
-            'current_race': f_race,
-            'current_loyalty': f_loyalty,
-            'current_active': f_active
-        }
-    )
-
-
+#я знаю что так не правильно,
+#я пишу их чисто для себя
 def add_new_demon(request):
     Knight.objects.create(name='Malphas', race='demon', loyalty_level=95)
 
@@ -144,6 +147,68 @@ def get_artifacts(request):
             'artifacts': artifact,
             'locations': location
         })
+
+
+class KnightListView(ListView):
+    model = Knight
+    template_name = 'knights_list.html'
+    context_object_name = 'knights'
+
+    def get_queryset(self):
+        queryset = Knight.objects.select_related('faction').all()
+
+        f_race = self.request.GET.get('filter_race')
+        f_loyalty = self.request.GET.get('filter_loyalty')
+        f_active = self.request.GET.get('filter_active')
+
+        if f_race:
+            queryset = queryset.filter(race__icontainst=f_race)
+
+        if f_loyalty:
+            queryset = queryset.filter(loyalty_level=int(f_loyalty))
+
+        if f_active:
+            is_active_bool = f_active == 'true'
+            queryset = queryset.filter(is_active=is_active_bool)
+
+        return queryset.order_by('-loyalty_level')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['factions'] = Faction.objects.all()
+
+        context['current_race'] = self.request.GET.get('filter_race')
+        context['current_loyalty'] = self.request.GET.get('filter_loyalty')
+        context['current_active'] = self.request.GET.get('filter_active')
+        return context
+
+
+class CreateKnightView(CreateView):
+    model = Knight
+    fields = ['name', 'race', 'loyalty_level', 'faction']
+    template_name = 'knights_list.html'
+    success_url = reverse_lazy('knights_list')
+
+    def form_valid(self, form):
+        loyalty = form.cleaned_data.get('loyalty_level')
+        name = form.cleaned_data.get('name')
+        race = form.cleaned_data.get('race')
+
+        if loyalty is not None and (loyalty < 0 or loyalty > 100):
+            return HttpResponse('ОШИБКА: лояльность должна быть от 0 до 100!')
+        elif not name or not race:
+            return HttpResponse('ОШИБКА: поля не могут быть пустыми')
+
+        return super().form_valid(form)
+
+
+class DeleteKnightView(DeleteView):
+    model = Knight
+
+    success_url = reverse_lazy('knights_list')
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
 
 class ArtifactListAPIView(APIView):
